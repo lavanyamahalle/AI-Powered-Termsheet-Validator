@@ -1,0 +1,152 @@
+{% extends "layout.html" %}
+
+{% block title %}Validation Rules{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-cogs me-2"></i>Validation Rules</h3>
+                </div>
+                <div class="card-body">
+                    <p class="card-text mb-4">
+                        Configure validation rules to customize how term sheets are validated. These rules determine which fields are required and what formats are expected.
+                    </p>
+                    
+                    {% if rules %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Field</th>
+                                        <th>Rule Type</th>
+                                        <th>Rule Value</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for rule in rules %}
+                                    <tr>
+                                        <td class="text-capitalize">{{ rule.field_name.replace('_', ' ') }}</td>
+                                        <td>{{ rule.rule_type.replace('_', ' ') }}</td>
+                                        <td>{{ rule.rule_value }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="editRule('{{ rule.id }}', '{{ rule.field_name }}', '{{ rule.rule_type }}', '{{ rule.rule_value }}')">
+                                                <i class="fas fa-edit me-1"></i>Edit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>No validation rules have been defined yet.
+                            Add your first rule using the form below.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark">
+                    <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Add Rule</h4>
+                </div>
+                <div class="card-body">
+                    <form id="rule-form" action="{{ url_for('validation_rules') }}" method="post">
+                        <input type="hidden" id="rule-id" name="rule_id">
+                        
+                        <div class="mb-3">
+                            <label for="field-name" class="form-label">Field Name</label>
+                            <select class="form-select" id="field-name" name="field_name" required>
+                                <option value="" selected disabled>Select a field</option>
+                                <option value="parties">Parties</option>
+                                <option value="effective_date">Effective Date</option>
+                                <option value="expiration_date">Expiration Date</option>
+                                <option value="transaction_amount">Transaction Amount</option>
+                                <option value="interest_rate">Interest Rate</option>
+                                <option value="payment_terms">Payment Terms</option>
+                                <option value="collateral">Collateral</option>
+                                <option value="governing_law">Governing Law</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="rule-type" class="form-label">Rule Type</label>
+                            <select class="form-select" id="rule-type" name="rule_type" required>
+                                <option value="" selected disabled>Select a rule type</option>
+                                <option value="required">Required Field</option>
+                                <option value="date_format">Date Format</option>
+                                <option value="range">Numeric Range</option>
+                                <option value="regex">Regular Expression</option>
+                                <option value="date_after">Date After Field</option>
+                                <option value="positive_number">Positive Number</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="rule-value" class="form-label">Rule Value</label>
+                            <input type="text" class="form-control" id="rule-value" name="rule_value" placeholder="Depends on rule type">
+                            <div class="form-text">Example: true, %Y-%m-%d, 0,100, etc.</div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Rule
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-question-circle me-2"></i>Rule Types</h4>
+                </div>
+                <div class="card-body">
+                    <dl>
+                        <dt>Required Field</dt>
+                        <dd>Specifies whether a field must be present. Value: true/false</dd>
+                        
+                        <dt>Date Format</dt>
+                        <dd>Specifies the expected date format. Example: %Y-%m-%d</dd>
+                        
+                        <dt>Numeric Range</dt>
+                        <dd>Specifies the valid range for numeric values. Format: min,max</dd>
+                        
+                        <dt>Regular Expression</dt>
+                        <dd>Validates field against a regex pattern. Example: ^[A-Z]{2}\d{6}$</dd>
+                        
+                        <dt>Date After Field</dt>
+                        <dd>Ensures date is after another field. Example: effective_date</dd>
+                        
+                        <dt>Positive Number</dt>
+                        <dd>Ensures value is a positive number. Value: true/false</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function editRule(id, fieldName, ruleType, ruleValue) {
+        document.getElementById('rule-id').value = id;
+        document.getElementById('field-name').value = fieldName;
+        document.getElementById('rule-type').value = ruleType;
+        document.getElementById('rule-value').value = ruleValue;
+        
+        // Change button text
+        const button = document.querySelector('#rule-form button[type="submit"]');
+        button.innerHTML = '<i class="fas fa-edit me-2"></i>Update Rule';
+        
+        // Scroll to form
+        document.querySelector('.card-header:contains("Add Rule")').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+{% endblock %}

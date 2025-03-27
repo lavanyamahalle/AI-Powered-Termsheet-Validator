@@ -1,0 +1,222 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-chart-line me-2"></i>Validation Dashboard</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <!-- Summary Statistics -->
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-0">Total Documents</h6>
+                                            <h2 class="my-2">{{ documents|length }}</h2>
+                                        </div>
+                                        <i class="fas fa-file-alt fa-3x opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-0">This Week</h6>
+                                            <h2 class="my-2">
+                                                {% set recent_count = 0 %}
+                                                {% for doc in documents %}
+                                                    {% if (now - doc.upload_date).days <= 7 %}
+                                                        {% set recent_count = recent_count + 1 %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {{ recent_count }}
+                                            </h2>
+                                        </div>
+                                        <i class="fas fa-calendar-week fa-3x opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="card-title mb-0">Document Types</h6>
+                                            <h2 class="my-2">
+                                                {% set file_types = [] %}
+                                                {% for doc in documents %}
+                                                    {% if doc.file_type not in file_types %}
+                                                        {% set file_types = file_types + [doc.file_type] %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {{ file_types|length }}
+                                            </h2>
+                                        </div>
+                                        <i class="fas fa-file-invoice fa-3x opacity-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Document History -->
+                    <h4 class="mb-3">Document History</h4>
+                    {% if documents %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Document Name</th>
+                                        <th>Type</th>
+                                        <th>Upload Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for document in documents %}
+                                    <tr>
+                                        <td>{{ document.name }}</td>
+                                        <td>
+                                            {% if document.file_type == 'pdf' %}
+                                                <span class="badge bg-danger doc-badge">PDF</span>
+                                            {% elif document.file_type in ['docx', 'doc'] %}
+                                                <span class="badge bg-primary doc-badge">Word</span>
+                                            {% elif document.file_type in ['xlsx', 'xls'] %}
+                                                <span class="badge bg-success doc-badge">Excel</span>
+                                            {% elif document.file_type in ['png', 'jpg', 'jpeg'] %}
+                                                <span class="badge bg-info doc-badge">Image</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary doc-badge">{{ document.file_type }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ document.upload_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            <a href="{{ url_for('document_details', document_id=document.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i>View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>No documents have been uploaded yet.
+                            <a href="{{ url_for('upload') }}" class="alert-link">Upload your first document</a>.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Recent Validation Activity -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark">
+                    <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Validation Statistics</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Most Common Validation Issues</h5>
+                            <div class="list-group mb-4">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    Missing effective date
+                                    <span class="badge bg-danger rounded-pill">42%</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    Incomplete party information
+                                    <span class="badge bg-danger rounded-pill">38%</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    Invalid transaction amount format
+                                    <span class="badge bg-warning rounded-pill">27%</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    Missing payment terms
+                                    <span class="badge bg-warning rounded-pill">24%</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    Unclear governing law
+                                    <span class="badge bg-info rounded-pill">18%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Document Type Distribution</h5>
+                            <div class="chart-container mb-4" style="position: relative; height:230px;">
+                                <!-- Sample SVG donut chart -->
+                                <svg viewBox="0 0 400 230" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Donut chart -->
+                                    <g transform="translate(120, 115)">
+                                        <!-- PDF segment -->
+                                        <path d="M 0 -80 A 80 80 0 0 1 76.8 -22.4 L 0 0 Z" fill="#dc3545" />
+                                        <text x="40" y="-40" fill="white" font-size="14">PDF</text>
+                                        <text x="40" y="-25" fill="white" font-size="12">45%</text>
+                                        
+                                        <!-- Word segment -->
+                                        <path d="M 76.8 -22.4 A 80 80 0 0 1 0 80 L 0 0 Z" fill="#0d6efd" />
+                                        <text x="35" y="40" fill="white" font-size="14">Word</text>
+                                        <text x="35" y="55" fill="white" font-size="12">30%</text>
+                                        
+                                        <!-- Excel segment -->
+                                        <path d="M 0 80 A 80 80 0 0 1 -76.8 -22.4 L 0 0 Z" fill="#198754" />
+                                        <text x="-50" y="40" fill="white" font-size="14">Excel</text>
+                                        <text x="-50" y="55" fill="white" font-size="12">20%</text>
+                                        
+                                        <!-- Image segment -->
+                                        <path d="M -76.8 -22.4 A 80 80 0 0 1 0 -80 L 0 0 Z" fill="#0dcaf0" />
+                                        <text x="-45" y="-40" fill="white" font-size="14">Image</text>
+                                        <text x="-45" y="-25" fill="white" font-size="12">5%</text>
+                                        
+                                        <!-- Center hole -->
+                                        <circle cx="0" cy="0" r="40" fill="#343a40" />
+                                    </g>
+                                    
+                                    <!-- Legend -->
+                                    <g transform="translate(280, 85)">
+                                        <rect x="0" y="0" width="15" height="15" fill="#dc3545" />
+                                        <text x="25" y="12" font-size="14">PDF</text>
+                                        
+                                        <rect x="0" y="25" width="15" height="15" fill="#0d6efd" />
+                                        <text x="25" y="37" font-size="14">Word</text>
+                                        
+                                        <rect x="0" y="50" width="15" height="15" fill="#198754" />
+                                        <text x="25" y="62" font-size="14">Excel</text>
+                                        
+                                        <rect x="0" y="75" width="15" height="15" fill="#0dcaf0" />
+                                        <text x="25" y="87" font-size="14">Image</text>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-secondary">
+                        <h5 class="alert-heading"><i class="fas fa-lightbulb me-2"></i>Insights</h5>
+                        <p>Based on the validation history, we recommend focusing on:</p>
+                        <ol>
+                            <li>Ensuring effective dates are clearly specified in all term sheets</li>
+                            <li>Providing complete information for all parties involved</li>
+                            <li>Standardizing transaction amount formats across all documents</li>
+                        </ol>
+                        <p class="mb-0">These improvements could significantly increase your validation success rate.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

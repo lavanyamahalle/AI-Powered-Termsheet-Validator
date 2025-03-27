@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+
+{% block title %}Validation Results{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-clipboard-check me-2"></i>
+                        Validation Results
+                    </h3>
+                    {% if document %}
+                    <span class="badge bg-light text-dark">{{ document.name }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <!-- Validation Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h4>Validation Summary</h4>
+                            <div class="d-flex align-items-center mt-3">
+                                <div class="progress validation-progress flex-grow-1 me-3" style="height: 25px;">
+                                    {% if validation_percentage >= 80 %}
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ validation_percentage }}%">{{ validation_percentage|round|int }}%</div>
+                                    {% elif validation_percentage >= 50 %}
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ validation_percentage }}%">{{ validation_percentage|round|int }}%</div>
+                                    {% else %}
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ validation_percentage }}%">{{ validation_percentage|round|int }}%</div>
+                                    {% endif %}
+                                </div>
+                                <div class="text-end" style="min-width: 60px;">
+                                    {% if validation_percentage >= 80 %}
+                                        <span class="badge bg-success fs-6">Pass</span>
+                                    {% elif validation_percentage >= 50 %}
+                                        <span class="badge bg-warning fs-6">Review</span>
+                                    {% else %}
+                                        <span class="badge bg-danger fs-6">Fail</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Quick Actions</h5>
+                                    <div class="d-flex gap-2 mt-3">
+                                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                                            <i class="fas fa-chart-line me-2"></i>View Dashboard
+                                        </a>
+                                        <a href="{{ url_for('upload') }}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-upload me-2"></i>Upload Another
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Validation Details -->
+                    <h4 class="mb-3">Validation Details</h4>
+                    <div class="row">
+                        {% for field, result in validation_results.items() %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card validation-card {% if result.is_valid %}validation-valid{% else %}validation-invalid{% endif %}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <h5 class="card-title text-capitalize">{{ field.replace('_', ' ') }}</h5>
+                                        {% if result.is_valid %}
+                                            <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Valid</span>
+                                        {% else %}
+                                            <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>Invalid</span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="card-text">{{ result.message }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Extracted Data Section -->
+            {% if extracted_data %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-dark">
+                    <h4 class="mb-0"><i class="fas fa-database me-2"></i>Extracted Data</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover field-table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Extracted Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for field, value in extracted_data.items() %}
+                                <tr>
+                                    <th class="text-capitalize">{{ field.replace('_', ' ') }}</th>
+                                    <td>
+                                        {% if value is string %}
+                                            {{ value }}
+                                        {% elif value is iterable %}
+                                            <ul class="mb-0">
+                                                {% for item in value %}
+                                                    <li>{{ item }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            {{ value }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Recommendations Section -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Recommendations</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-secondary">
+                        {% if validation_percentage >= 80 %}
+                            <h5><i class="fas fa-check-circle me-2 text-success"></i>This term sheet passes validation!</h5>
+                            <p>The document meets most of the validation criteria. Here are some suggestions:</p>
+                            <ul>
+                                <li>Review any minor warnings that may have been flagged</li>
+                                <li>Ensure all parties have confirmed the terms</li>
+                                <li>Archive this document appropriately for future reference</li>
+                            </ul>
+                        {% elif validation_percentage >= 50 %}
+                            <h5><i class="fas fa-exclamation-circle me-2 text-warning"></i>This term sheet needs review</h5>
+                            <p>The document has some validation issues that should be addressed:</p>
+                            <ul>
+                                <li>Check the fields marked as invalid and make necessary corrections</li>
+                                <li>Consider uploading an updated version after making changes</li>
+                                <li>Consult with relevant stakeholders to resolve any ambiguities</li>
+                            </ul>
+                        {% else %}
+                            <h5><i class="fas fa-times-circle me-2 text-danger"></i>This term sheet has significant issues</h5>
+                            <p>The document has failed several validation checks:</p>
+                            <ul>
+                                <li>Address all validation errors marked in red</li>
+                                <li>Ensure all required fields are properly filled</li>
+                                <li>Check for formatting issues that might affect extraction</li>
+                                <li>Consider creating a new term sheet that meets all requirements</li>
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

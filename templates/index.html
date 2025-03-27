@@ -1,0 +1,182 @@
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold text-body-emphasis">TermSheet Validator</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">
+            Streamline your term sheet validation process with AI-powered extraction and validation.
+            Upload your documents in various formats and get instant validation results.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                <i class="fas fa-upload me-2"></i> Upload Document
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="fas fa-chart-line me-2"></i> View Dashboard
+            </a>
+        </div>
+        <div class="mt-3">
+            <a href="{{ url_for('static', filename='sample/sample_term_sheet.txt') }}" class="text-decoration-none" download>
+                <i class="fas fa-file-alt me-1"></i> Download Sample Term Sheet
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container px-4 py-5">
+    <h2 class="pb-2 border-bottom">Key Features</h2>
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        <div class="col d-flex align-items-start">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 me-3">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div>
+                <h3 class="fw-bold mb-0 fs-4">Multiple Document Formats</h3>
+                <p>Upload documents in various formats including PDF, Word, Excel, and even scanned images.</p>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 me-3">
+                <i class="fas fa-search"></i>
+            </div>
+            <div>
+                <h3 class="fw-bold mb-0 fs-4">Intelligent Data Extraction</h3>
+                <p>Our AI-powered system extracts key terms from your documents using OCR and NLP technologies.</p>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 me-3">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <h3 class="fw-bold mb-0 fs-4">Automated Validation</h3>
+                <p>Validate term sheets against predefined rules, ensuring compliance and accuracy.</p>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 me-3">
+                <i class="fas fa-history"></i>
+            </div>
+            <div>
+                <h3 class="fw-bold mb-0 fs-4">Document History</h3>
+                <p>Access a comprehensive history of your document validations for reference and auditing.</p>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 me-3">
+                <i class="fas fa-cogs"></i>
+            </div>
+            <div>
+                <h3 class="fw-bold mb-0 fs-4">Customizable Rules</h3>
+                <p>Define and customize validation rules to meet your specific organizational requirements.</p>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 me-3">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <div>
+                <h3 class="fw-bold mb-0 fs-4">Detailed Reports</h3>
+                <p>Get detailed validation reports with clear pass/fail indicators and actionable feedback.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container px-4 py-5 bg-dark rounded-3">
+    <div class="row align-items-center g-5 py-5">
+        <div class="col-lg-7">
+            <h2 class="fw-bold lh-1 mb-3">Streamline Your Workflow</h2>
+            <p class="lead">
+                The term sheet validation process is traditionally time-consuming and error-prone. 
+                Our AI-powered solution drastically reduces validation time and improves accuracy by automating 
+                data extraction and validation against predefined criteria.
+            </p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg px-4 me-md-2">Get Started</a>
+            </div>
+        </div>
+        <div class="col-lg-5 text-center">
+            <div class="ratio ratio-16x9">
+                <!-- SVG Illustration representing document processing -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" class="img-fluid">
+                    <!-- Document outline -->
+                    <rect x="100" y="50" width="400" height="300" fill="#2c3e50" rx="10" ry="10" />
+                    <rect x="130" y="80" width="340" height="240" fill="#34495e" rx="5" ry="5" />
+                    
+                    <!-- Document content lines -->
+                    <rect x="150" y="110" width="300" height="10" fill="#95a5a6" rx="2" ry="2" />
+                    <rect x="150" y="130" width="280" height="10" fill="#95a5a6" rx="2" ry="2" />
+                    <rect x="150" y="150" width="260" height="10" fill="#95a5a6" rx="2" ry="2" />
+                    <rect x="150" y="170" width="300" height="10" fill="#95a5a6" rx="2" ry="2" />
+                    <rect x="150" y="190" width="270" height="10" fill="#95a5a6" rx="2" ry="2" />
+                    
+                    <!-- Highlight elements -->
+                    <rect x="150" y="220" width="120" height="15" fill="#3498db" rx="2" ry="2" />
+                    <rect x="150" y="245" width="180" height="15" fill="#2ecc71" rx="2" ry="2" />
+                    <rect x="150" y="270" width="150" height="15" fill="#e74c3c" rx="2" ry="2" />
+                    
+                    <!-- Validation checkmarks -->
+                    <circle cx="300" y="227" r="10" fill="#2ecc71" />
+                    <path d="M295,227 L300,232 L305,222" stroke="white" stroke-width="2" fill="none" />
+                    
+                    <circle cx="360" y="252" r="10" fill="#2ecc71" />
+                    <path d="M355,252 L360,257 L365,247" stroke="white" stroke-width="2" fill="none" />
+                    
+                    <circle cx="330" y="277" r="10" fill="#e74c3c" />
+                    <path d="M325,272 L335,282 M325,282 L335,272" stroke="white" stroke-width="2" fill="none" />
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container px-4 py-5">
+    <h2 class="pb-2 border-bottom">Benefits</h2>
+    <div class="row row-cols-1 row-cols-md-2 align-items-md-center g-5 py-5">
+        <div class="col d-flex flex-column align-items-start gap-2">
+            <h3 class="fw-bold">Enhanced Efficiency and Accuracy</h3>
+            <p class="text-body-secondary">
+                Our AI-powered term sheet validation system delivers significant benefits, 
+                from reducing processing time to improving data accuracy and compliance.
+            </p>
+            <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg">Start Validating Now</a>
+        </div>
+        <div class="col">
+            <div class="row row-cols-1 row-cols-sm-2 g-4">
+                <div class="col d-flex flex-column gap-2">
+                    <div class="feature-icon-small d-inline-flex align-items-center justify-content-center fs-4 rounded-3">
+                        <i class="fas fa-tachometer-alt text-primary"></i>
+                    </div>
+                    <h4 class="fw-semibold mb-0">Increased Efficiency</h4>
+                    <p class="text-body-secondary">Streamline processes and reduce validation times by up to 80%.</p>
+                </div>
+                <div class="col d-flex flex-column gap-2">
+                    <div class="feature-icon-small d-inline-flex align-items-center justify-content-center fs-4 rounded-3">
+                        <i class="fas fa-check-double text-primary"></i>
+                    </div>
+                    <h4 class="fw-semibold mb-0">Improved Accuracy</h4>
+                    <p class="text-body-secondary">Reduce human errors and ensure higher precision in data handling.</p>
+                </div>
+                <div class="col d-flex flex-column gap-2">
+                    <div class="feature-icon-small d-inline-flex align-items-center justify-content-center fs-4 rounded-3">
+                        <i class="fas fa-coins text-primary"></i>
+                    </div>
+                    <h4 class="fw-semibold mb-0">Cost Savings</h4>
+                    <p class="text-body-secondary">Lower operational costs and reduce the need for manual intervention.</p>
+                </div>
+                <div class="col d-flex flex-column gap-2">
+                    <div class="feature-icon-small d-inline-flex align-items-center justify-content-center fs-4 rounded-3">
+                        <i class="fas fa-shield-alt text-primary"></i>
+                    </div>
+                    <h4 class="fw-semibold mb-0">Enhanced Compliance</h4>
+                    <p class="text-body-secondary">Better adherence to regulatory requirements and minimized risk.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

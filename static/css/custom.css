@@ -1,0 +1,115 @@
+/* Custom styles for Term Sheet Validation Application */
+
+/* Card styles for the validation results */
+.validation-card {
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.validation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Colors for validation results */
+.validation-valid {
+    border-left: 5px solid var(--bs-success);
+}
+
+.validation-invalid {
+    border-left: 5px solid var(--bs-danger);
+}
+
+/* Field summary table */
+.field-table th {
+    width: 40%;
+}
+
+/* Progress bar styles */
+.validation-progress {
+    height: 10px;
+    border-radius: 5px;
+}
+
+/* Document type badges */
+.doc-badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Spinner for loading state */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    visibility: hidden;
+}
+
+/* File upload area */
+.drop-zone {
+    border: 2px dashed var(--bs-secondary);
+    border-radius: 8px;
+    padding: 3rem;
+    text-align: center;
+    transition: border-color 0.3s ease;
+    cursor: pointer;
+}
+
+.drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--bs-primary);
+}
+
+.drop-zone-prompt {
+    margin-bottom: 1rem;
+}
+
+/* Dashboard cards */
+.dashboard-card {
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Rules editor form */
+.rule-form-section {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Custom accordion for extracted data */
+.data-accordion .accordion-button:not(.collapsed) {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+/* SVG icon colors */
+.feature-icon {
+    color: var(--bs-primary);
+}
+
+/* Error page styles */
+.error-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+}
+
+.error-code {
+    font-size: 6rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}

@@ -1,0 +1,29 @@
+TERM SHEET
+
+Transaction between ACME CORPORATION INC. and GLOBAL INVESTMENTS LTD.
+
+Effective Date: March 25, 2025
+Expiration Date: March 25, 2030
+
+TRANSACTION SUMMARY:
+Principal Amount: $5,000,000.00 USD
+Interest Rate: 5.25% per annum
+Payment Terms: Quarterly payments of interest only with principal due at maturity
+
+COLLATERAL:
+The obligations will be secured by a first-priority security interest in all assets of ACME CORPORATION INC., including but not limited to equipment, inventory, accounts receivable, and intellectual property.
+
+GOVERNING LAW:
+This agreement shall be governed by the laws of the State of New York, United States, without giving effect to conflict of laws principles.
+
+SIGNATURES:
+
+________________________
+John Smith, CEO
+ACME CORPORATION INC.
+Date: March 24, 2025
+
+________________________
+Jane Doe, Managing Director
+GLOBAL INVESTMENTS LTD.
+Date: March 24, 2025

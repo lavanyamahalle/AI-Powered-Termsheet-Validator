@@ -1,0 +1,52 @@
+TermSheet Validation using AI
+Problem Statement
+
+TermSheet Validation using AI
+
+Challenge:
+
+In the markets post-trade areas, our teams face significant challenges managing the high volume of term sheets each month. The manual validation process is time-consuming, error-prone, and resource-intensive, leading to delays, inaccuracies, and increased risk of non-compliance with regulatory requirements.
+
+The Middle Office handles a high volume of term sheets daily, making it difficult to maintain accuracy and efficiency.
+The manual process is prone to human errors, resulting in trade validation inaccuracies.
+Significant human resources are required for manual validation, which could be better utilized in strategic tasks.
+Technology:
+
+Term sheets can come in various formats, including unstructured formats such as emails, chats, and messages. They can also be in structured formats like Word documents, PDFs, and Excel spreadsheets
+
+Optical Character Recognition (OCR): This technology can be used to extract text from images or scanned documents.
+Natural Language Processing (NLP): NLP can be used to understand and process the unstructured text in term sheets.
+Machine Learning (ML): ML algorithms can be trained to recognize and validate the data extracted from term sheets.
+AI-driven Data Extraction: AI models can be used to extract relevant data from term sheets and validate it against predefined criteria.
+Data:
+
+Sample data: Will be provided either Public or masked during the Finale event.
+Public Data: Students can use publicly available data to train their models if required.
+Design Considerations:
+
+Data Formats and Extraction
+Integration with Core Applications
+Validation and Automation: Implement AI-driven data extraction and validation to automatically extract relevant data from term sheets and validate it against predefined criteria.
+Feedback Mechanism
+Security and Compliance
+User Experience
+Scalability and Flexibility
+Other Considerations:
+
+This solution would have an input and output which would further need to be connected to a core application or an appropriate format.
+Maintain high-quality data to improve accuracy and ensure compliance with regulatory requirements.
+Regular data cleansing processes should be in place to ensure that the data used for validation is accurate and up-to-date.
+Benefits:
+
+Increased Efficiency:
+Streamlined processes
+Faster validation times
+Improved Accuracy:
+Reduction in human errors
+Higher precision in data handling
+Cost Savings:
+Lower operational costs
+Reduced need for manual intervention
+Enhanced Compliance:
+Better adherence to regulatory requirements
+Minimized risk of non-compliance

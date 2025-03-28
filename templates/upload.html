@@ -8,9 +8,16 @@
         <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Term Sheet</h3>
+                    <h3 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>Upload Term Sheet
+                        <span class="badge bg-warning ms-2 fs-6">Prototype</span>
+                    </h3>
                 </div>
                 <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-flask me-2"></i>
+                        <strong>Prototype Demo:</strong> This is a simplified version for demonstration purposes. Some features may be limited.
+                    </div>
                     <p class="card-text mb-4">
                         Upload your term sheet document for AI-powered validation. We support various formats including PDF, Word, Excel, and images.
                     </p>
@@ -68,10 +75,20 @@
             
             <div class="card mt-4 shadow-sm">
                 <div class="card-header bg-dark">
-                    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Upload Instructions</h4>
+                    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Prototype Instructions</h4>
                 </div>
                 <div class="card-body">
-                    <h5>Supported File Types</h5>
+                    <div class="mb-4">
+                        <h5>For Demo Purposes</h5>
+                        <p>This prototype illustrates the core concept and user flow of the term sheet validation system. For the best demonstration experience:</p>
+                        <ol>
+                            <li>Use the sample term sheet provided below</li>
+                            <li>Follow the validation process to see extraction and validation capabilities</li>
+                            <li>Review the dashboard to understand the history tracking feature</li>
+                        </ol>
+                    </div>
+                    
+                    <h5>Supported File Types in Prototype</h5>
                     <ul class="list-unstyled">
                         <li><i class="far fa-file-pdf text-danger me-2"></i>PDF Documents (.pdf)</li>
                         <li><i class="far fa-file-word text-primary me-2"></i>Microsoft Word (.doc, .docx)</li>
@@ -79,19 +96,16 @@
                         <li><i class="far fa-file-image text-info me-2"></i>Images (.png, .jpg, .jpeg)</li>
                     </ul>
                     
-                    <h5 class="mt-3">Tips for Best Results</h5>
-                    <ul>
-                        <li>Ensure documents are clear and legible for best extraction results</li>
-                        <li>Scanned documents should be at least 300 DPI for optimal OCR accuracy</li>
-                        <li>For structured documents, maintain the standard format for better recognition</li>
-                        <li>Include all relevant sections of the term sheet for complete validation</li>
-                    </ul>
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Prototype Limitation:</strong> This demo has limited extraction capabilities and focused validation rules as it's an early development version.
+                    </div>
                     
                     <div class="alert alert-info mt-3">
                         <i class="fas fa-file-alt me-2"></i>
-                        <strong>Need a sample?</strong> Download our 
+                        <strong>Sample Document:</strong> Download our 
                         <a href="{{ url_for('static', filename='sample/sample_term_sheet.txt') }}" class="alert-link" download>sample term sheet</a>
-                        to test the system.
+                        to test the prototype system.
                     </div>
                 </div>
             </div>

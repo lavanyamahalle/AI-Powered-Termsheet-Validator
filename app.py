@@ -33,8 +33,8 @@ app.config["UPLOAD_FOLDER"] = tempfile.gettempdir()
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB limit
 app.config["ALLOWED_EXTENSIONS"] = {"pdf", "docx", "doc", "xlsx", "xls", "png", "jpg", "jpeg"}
 
-# Prototype mode - set to True if you want to use sample data
-app.config["PROTOTYPE_MODE"] = False
+# Production configuration
+app.config["ENVIRONMENT"] = "production"
 
 # Initialize the app with SQLAlchemy extension
 db.init_app(app)
@@ -174,32 +174,8 @@ def results():
 @app.route('/dashboard')
 def dashboard():
     """Display dashboard with past document validations"""
-    if app.config["PROTOTYPE_MODE"]:
-        # Sample documents for prototype mode
-        documents = [
-            {
-                'id': 1,
-                'name': 'ACME-Global Term Sheet',
-                'file_type': 'docx',
-                'upload_date': datetime.now() - timedelta(hours=2)
-            },
-            {
-                'id': 2,
-                'name': 'Financing Agreement Q1-2025',
-                'file_type': 'pdf',
-                'upload_date': datetime.now() - timedelta(days=2)
-            },
-            {
-                'id': 3,
-                'name': 'Investment Terms Summary',
-                'file_type': 'xlsx',
-                'upload_date': datetime.now() - timedelta(days=5)
-            }
-        ]
-        flash('Prototype Mode: Showing sample data', 'info')
-    else:
-        # Get real documents from database
-        documents = Document.query.order_by(Document.upload_date.desc()).all()
+    # Get documents from database
+    documents = Document.query.order_by(Document.upload_date.desc()).all()
     
     return render_template('dashboard.html', documents=documents)
 

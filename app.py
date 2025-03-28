@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.utils import secure_filename
 import tempfile
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -57,78 +57,66 @@ def index():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
-    """Handle document uploads and processing"""
+    """Handle document uploads - PROTOTYPE DEMO VERSION (FRONTEND ONLY)"""
     if request.method == 'POST':
-        # Check if a file was uploaded
-        if 'document' not in request.files:
-            flash('No file part', 'danger')
-            return redirect(request.url)
+        # In prototype version, we just simulate a successful upload
+        # and redirect to results with sample data
         
-        file = request.files['document']
+        # Sample extracted data for prototype
+        extracted_data = {
+            'parties': ['ACME CORPORATION INC.', 'GLOBAL INVESTMENTS LTD.'],
+            'effective_date': '2025-03-25',
+            'expiration_date': '2030-03-25',
+            'transaction_amount': '$5,000,000.00 USD',
+            'interest_rate': '5.25%',
+            'payment_terms': 'Quarterly payments of interest only with principal due at maturity',
+            'collateral': 'All assets of ACME CORPORATION INC.',
+            'governing_law': 'State of New York, United States'
+        }
         
-        # Check if a file was selected
-        if file.filename == '':
-            flash('No file selected', 'danger')
-            return redirect(request.url)
+        # Sample validation results for prototype
+        validation_results = {
+            'parties': {
+                'is_valid': True,
+                'message': 'All parties properly identified'
+            },
+            'effective_date': {
+                'is_valid': True,
+                'message': 'Date format is valid'
+            },
+            'expiration_date': {
+                'is_valid': True,
+                'message': 'Date is after effective date'
+            },
+            'transaction_amount': {
+                'is_valid': True,
+                'message': 'Amount is properly formatted'
+            },
+            'interest_rate': {
+                'is_valid': True,
+                'message': 'Rate is within acceptable range'
+            },
+            'payment_terms': {
+                'is_valid': True,
+                'message': 'Payment terms specified'
+            },
+            'collateral': {
+                'is_valid': True,
+                'message': 'Collateral information provided'
+            },
+            'governing_law': {
+                'is_valid': True,
+                'message': 'Governing law jurisdiction specified'
+            }
+        }
         
-        # Process the file if it's valid
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
-            
-            try:
-                # Process the document to extract data
-                document_type = file.filename.split('.')[-1].lower()
-                document_name = request.form.get('document_name', filename)
-                
-                # Save document to database
-                new_document = Document(
-                    name=document_name,
-                    file_type=document_type,
-                    upload_date=datetime.now(),
-                    file_path=file_path
-                )
-                db.session.add(new_document)
-                db.session.commit()
-                
-                # Process document to extract data
-                extracted_data = process_document(file_path, document_type)
-                
-                if not extracted_data:
-                    flash('Failed to extract data from document', 'danger')
-                    return redirect(url_for('upload'))
-                
-                # Store extracted data in session for validation
-                session['document_id'] = new_document.id
-                session['extracted_data'] = extracted_data
-                
-                # Validate the extracted data
-                validation_results = validate_extracted_data(extracted_data)
-                
-                # Save validation results
-                for field, result in validation_results.items():
-                    validation_record = ValidationResult(
-                        document_id=new_document.id,
-                        field_name=field,
-                        is_valid=result['is_valid'],
-                        message=result['message']
-                    )
-                    db.session.add(validation_record)
-                db.session.commit()
-                
-                # Store validation results in session
-                session['validation_results'] = validation_results
-                
-                return redirect(url_for('results'))
-            
-            except Exception as e:
-                logger.error(f"Error processing document: {str(e)}")
-                flash(f'Error processing document: {str(e)}', 'danger')
-                return redirect(url_for('upload'))
-        else:
-            flash('File type not allowed', 'danger')
-            return redirect(request.url)
+        # Store in session for prototype
+        session['document_id'] = 1
+        session['extracted_data'] = extracted_data
+        session['validation_results'] = validation_results
+        
+        flash('Document processed successfully (PROTOTYPE MODE)', 'success')
+        return redirect(url_for('results'))
     
     return render_template('upload.html')
 
@@ -156,26 +144,105 @@ def results():
 
 @app.route('/dashboard')
 def dashboard():
-    """Display dashboard with past document validations"""
-    documents = Document.query.order_by(Document.upload_date.desc()).all()
-    return render_template('dashboard.html', documents=documents)
+    """Display dashboard with sample document data (PROTOTYPE ONLY)"""
+    # Create sample document data for prototype
+    sample_documents = [
+        {
+            'id': 1,
+            'name': 'ACME-Global Term Sheet',
+            'file_type': 'docx',
+            'upload_date': datetime.now() - timedelta(hours=2)
+        },
+        {
+            'id': 2,
+            'name': 'Financing Agreement Q1-2025',
+            'file_type': 'pdf',
+            'upload_date': datetime.now() - timedelta(days=2)
+        },
+        {
+            'id': 3,
+            'name': 'Investment Terms Summary',
+            'file_type': 'xlsx',
+            'upload_date': datetime.now() - timedelta(days=5)
+        }
+    ]
+    return render_template('dashboard.html', documents=sample_documents)
 
 @app.route('/document/<int:document_id>')
 def document_details(document_id):
     """Display details for a specific document"""
-    document = Document.query.get_or_404(document_id)
-    validation_results = ValidationResult.query.filter_by(document_id=document_id).all()
+    # Sample document data for prototype
+    sample_documents = {
+        1: {
+            'id': 1,
+            'name': 'ACME-Global Term Sheet',
+            'file_type': 'docx',
+            'upload_date': datetime.now() - timedelta(hours=2)
+        },
+        2: {
+            'id': 2,
+            'name': 'Financing Agreement Q1-2025',
+            'file_type': 'pdf',
+            'upload_date': datetime.now() - timedelta(days=2)
+        },
+        3: {
+            'id': 3,
+            'name': 'Investment Terms Summary',
+            'file_type': 'xlsx',
+            'upload_date': datetime.now() - timedelta(days=5)
+        }
+    }
+    
+    document = sample_documents.get(document_id)
+    if not document:
+        flash('Document not found (Prototype Mode)', 'warning')
+        return redirect(url_for('dashboard'))
+    
+    # Sample validation results for prototype
+    validation_results = {
+        'parties': {
+            'is_valid': True,
+            'message': 'All parties properly identified'
+        },
+        'effective_date': {
+            'is_valid': True,
+            'message': 'Date format is valid'
+        },
+        'expiration_date': {
+            'is_valid': True,
+            'message': 'Date is after effective date'
+        },
+        'transaction_amount': {
+            'is_valid': document_id != 2,  # Simulate an issue in document 2
+            'message': 'Amount is properly formatted' if document_id != 2 else 'Invalid amount format'
+        },
+        'interest_rate': {
+            'is_valid': True,
+            'message': 'Rate is within acceptable range'
+        },
+        'payment_terms': {
+            'is_valid': document_id != 3,  # Simulate an issue in document 3
+            'message': 'Payment terms specified' if document_id != 3 else 'Missing payment terms'
+        },
+        'collateral': {
+            'is_valid': True,
+            'message': 'Collateral information provided'
+        },
+        'governing_law': {
+            'is_valid': True,
+            'message': 'Governing law jurisdiction specified'
+        }
+    }
     
     # Calculate validation summary
     total_fields = len(validation_results)
-    valid_fields = sum(1 for result in validation_results if result.is_valid)
+    valid_fields = sum(1 for result in validation_results.values() if result['is_valid'])
     validation_percentage = (valid_fields / total_fields * 100) if total_fields > 0 else 0
     
     return render_template(
         'results.html',
         document=document,
-        validation_results={result.field_name: {'is_valid': result.is_valid, 'message': result.message} 
-                           for result in validation_results},
+        validation_results=validation_results,
         validation_percentage=validation_percentage
     )
 
@@ -191,26 +258,45 @@ def validation_rules():
             flash('Field name and rule type are required', 'danger')
             return redirect(url_for('validation_rules'))
         
-        # Check if rule already exists for this field
-        existing_rule = ValidationRule.query.filter_by(field_name=field_name, rule_type=rule_type).first()
-        
-        if existing_rule:
-            existing_rule.rule_value = rule_value
-            flash('Validation rule updated', 'success')
-        else:
-            new_rule = ValidationRule(
-                field_name=field_name,
-                rule_type=rule_type,
-                rule_value=rule_value
-            )
-            db.session.add(new_rule)
-            flash('Validation rule added', 'success')
-        
-        db.session.commit()
+        # In prototype mode, we just simulate success
+        flash('Validation rule added (PROTOTYPE MODE)', 'success')
         return redirect(url_for('validation_rules'))
     
-    rules = ValidationRule.query.all()
-    return render_template('validation_rules.html', rules=rules)
+    # Sample validation rules for prototype
+    sample_rules = [
+        {
+            'id': 1,
+            'field_name': 'parties',
+            'rule_type': 'required',
+            'rule_value': 'true'
+        },
+        {
+            'id': 2,
+            'field_name': 'effective_date',
+            'rule_type': 'date_format',
+            'rule_value': '%Y-%m-%d'
+        },
+        {
+            'id': 3,
+            'field_name': 'expiration_date',
+            'rule_type': 'date_after',
+            'rule_value': 'effective_date'
+        },
+        {
+            'id': 4,
+            'field_name': 'transaction_amount',
+            'rule_type': 'positive_number',
+            'rule_value': 'true'
+        },
+        {
+            'id': 5,
+            'field_name': 'interest_rate',
+            'rule_type': 'range',
+            'rule_value': '0,100'
+        }
+    ]
+    
+    return render_template('validation_rules.html', rules=sample_rules)
 
 @app.errorhandler(404)
 def page_not_found(e):

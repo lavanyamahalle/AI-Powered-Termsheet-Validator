@@ -1,0 +1,324 @@
+import os
+import logging
+
+import db as db
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
+from werkzeug.utils import secure_filename
+import tempfile
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+# Setup logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+# Initialize SQLAlchemy base class
+class Base(DeclarativeBase):
+    pass
+load_dotenv()
+# Initialize Flask app and database
+
+app = Flask(__name__)
+db.init_app(app)
+
+app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key")
+
+# Configure database
+database_url = os.environ.get("DATABASE_URL")
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url or "sqlite:///termsheet.db"
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_recycle": 300,
+    "pool_pre_ping": True,
+}
+db = SQLAlchemy(model_class=Base)
+app.config["UPLOAD_FOLDER"] = tempfile.gettempdir()
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB limit
+app.config["ALLOWED_EXTENSIONS"] = {"pdf", "docx", "doc", "xlsx", "xls", "png", "jpg", "jpeg"}
+
+# Production configuration
+app.config["ENVIRONMENT"] = "production"
+
+# Initialize the app with SQLAlchemy extension
+db.init_app(app)
+
+# Import models and utils after app initialization to avoid circular imports
+def get_models():
+    from models import Document, ValidationRule, ValidationResult, ExtractedTerm
+    return Document, ValidationRule, ValidationResult, ExtractedTerm
+from utils.document_processor import process_document
+from utils.validation_engine import validate_extracted_data
+Document, ValidationRule, ValidationResult, ExtractedTerm = get_models()
+# Add context processor to provide datetime in all templates
+@app.context_processor
+def inject_now():
+    return {'now': datetime.now()}
+
+def allowed_file(filename):
+    """Check if the uploaded file has an allowed extension"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
+
+@app.route('/')
+def index():
+    """Render the home page"""
+    return render_template('index.html')
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+
+    # ✅ Retrieve models to avoid circular import issues
+    Document, ValidationRule, ValidationResult, ExtractedTerm = get_models()
+    """Handle document uploads and processing"""
+    if request.method == 'POST':
+        # Check if a file was uploaded
+        if 'document' not in request.files:
+            flash('No file part', 'danger')
+            return redirect(request.url)
+        
+        file = request.files['document']
+        
+        # Check if a file was selected
+        if file.filename == '':
+            flash('No file selected', 'danger')
+            return redirect(request.url)
+        
+        # Process the file if it's valid
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+            try:
+                # Process the document to extract data
+                document_type = file.filename.split('.')[-1].lower()
+                document_name = request.form.get('document_name', filename)
+                
+                # Save document to database
+                new_document = Document(
+                    name=document_name,
+                    file_type=document_type,
+                    upload_date=datetime.now(),
+                    file_path=file_path
+                )
+                db.session.add(new_document)
+                db.session.commit()
+                
+                # Process document to extract data
+                extracted_data = process_document(file_path, document_type)
+                
+                if not extracted_data:
+                    flash('Failed to extract data from document', 'danger')
+                    return redirect(url_for('upload'))
+                
+                # Store extracted data in session for validation
+                session['document_id'] = new_document.id
+                session['extracted_data'] = extracted_data
+                
+                # Store extracted terms in database
+                for term_name, term_value in extracted_data.items():
+                    # Convert lists to strings for storage
+                    if isinstance(term_value, list):
+                        term_value = ', '.join(term_value)
+                    
+                    extracted_term = ExtractedTerm(
+                        document_id=new_document.id,
+                        term_name=term_name,
+                        term_value=str(term_value),
+                        confidence_score=0.9  # Default confidence score
+                    )
+                    db.session.add(extracted_term)
+                
+                # Validate the extracted data
+                validation_results = validate_extracted_data(extracted_data)
+                
+                # Save validation results
+                for field, result in validation_results.items():
+                    validation_record = ValidationResult(
+                        document_id=new_document.id,
+                        field_name=field,
+                        is_valid=result['is_valid'],
+                        message=result['message']
+                    )
+                    db.session.add(validation_record)
+                db.session.commit()
+                
+                # Store validation results in session
+                session['validation_results'] = validation_results
+                
+                return redirect(url_for('results'))
+            
+            except Exception as e:
+                logger.error(f"Error processing document: {str(e)}")
+                flash(f'Error processing document: {str(e)}', 'danger')
+                return redirect(url_for('upload'))
+        else:
+            flash('File type not allowed', 'danger')
+            return redirect(request.url)
+    
+    return render_template('upload.html')
+
+@app.route('/results')
+def results():
+    """Display validation results"""
+    if 'extracted_data' not in session or 'validation_results' not in session:
+        flash('No document has been processed yet', 'warning')
+        return redirect(url_for('upload'))
+    
+    extracted_data = session.get('extracted_data', {})
+    validation_results = session.get('validation_results', {})
+    
+    # Calculate validation summary
+    total_fields = len(validation_results)
+    valid_fields = sum(1 for result in validation_results.values() if result['is_valid'])
+    validation_percentage = (valid_fields / total_fields * 100) if total_fields > 0 else 0
+    
+    return render_template(
+        'results.html',
+        extracted_data=extracted_data,
+        validation_results=validation_results,
+        validation_percentage=validation_percentage
+    )
+
+@app.route('/dashboard')
+def dashboard():
+    """Display dashboard with past document validations"""
+    # Get documents from database
+    documents = Document.query.order_by(Document.upload_date.desc()).all()
+    
+    return render_template('dashboard.html', documents=documents)
+
+@app.route('/document/<int:document_id>')
+def document_details(document_id):
+    """Display details for a specific document"""
+    document = Document.query.get_or_404(document_id)
+    validation_results = ValidationResult.query.filter_by(document_id=document_id).all()
+    
+    # Create a dictionary of validation results
+    validation_dict = {}
+    for result in validation_results:
+        validation_dict[result.field_name] = {
+            'is_valid': result.is_valid,
+            'message': result.message
+        }
+    
+    # Calculate validation summary
+    total_fields = len(validation_results)
+    valid_fields = sum(1 for result in validation_results if result.is_valid)
+    validation_percentage = (valid_fields / total_fields * 100) if total_fields > 0 else 0
+    
+    # Get extracted terms for the document
+    extracted_terms = ExtractedTerm.query.filter_by(document_id=document_id).all()
+    extracted_data = {}
+    for term in extracted_terms:
+        # Convert comma-separated string back to list if it appears to be a list
+        if ',' in term.term_value and term.term_name == 'parties':
+            extracted_data[term.term_name] = [item.strip() for item in term.term_value.split(',')]
+        else:
+            extracted_data[term.term_name] = term.term_value
+    
+    return render_template(
+        'results.html',
+        document=document,
+        validation_results=validation_dict,
+        validation_percentage=validation_percentage,
+        extracted_data=extracted_data
+    )
+
+@app.route('/validation_rules', methods=['GET', 'POST'])
+def validation_rules():
+    """Manage validation rules"""
+    if request.method == 'POST':
+        field_name = request.form.get('field_name')
+        rule_type = request.form.get('rule_type')
+        rule_value = request.form.get('rule_value')
+        rule_id = request.form.get('rule_id')
+        
+        if not field_name or not rule_type:
+            flash('Field name and rule type are required', 'danger')
+            return redirect(url_for('validation_rules'))
+        
+        # Check if rule already exists for this field
+        if rule_id and rule_id.isdigit():
+            existing_rule = ValidationRule.query.get(int(rule_id))
+            if existing_rule:
+                existing_rule.rule_value = rule_value
+                flash('Validation rule updated', 'success')
+            else:
+                flash('Rule not found', 'danger')
+                return redirect(url_for('validation_rules'))
+        else:
+            existing_rule = ValidationRule.query.filter_by(field_name=field_name, rule_type=rule_type).first()
+            
+            if existing_rule:
+                existing_rule.rule_value = rule_value
+                flash('Validation rule updated', 'success')
+            else:
+                new_rule = ValidationRule(
+                    field_name=field_name,
+                    rule_type=rule_type,
+                    rule_value=rule_value
+                )
+                db.session.add(new_rule)
+                flash('Validation rule added', 'success')
+        
+        db.session.commit()
+        return redirect(url_for('validation_rules'))
+    
+    # Load rules from database
+    rules = ValidationRule.query.all()
+    
+    # If no rules exist, create default rules
+    if not rules:
+        default_rules = [
+            {
+                'field_name': 'parties',
+                'rule_type': 'required',
+                'rule_value': 'true'
+            },
+            {
+                'field_name': 'effective_date',
+                'rule_type': 'date_format',
+                'rule_value': '%Y-%m-%d'
+            },
+            {
+                'field_name': 'expiration_date',
+                'rule_type': 'date_after',
+                'rule_value': 'effective_date'
+            },
+            {
+                'field_name': 'transaction_amount',
+                'rule_type': 'positive_number',
+                'rule_value': 'true'
+            },
+            {
+                'field_name': 'interest_rate',
+                'rule_type': 'range',
+                'rule_value': '0,100'
+            }
+        ]
+        
+        for rule_data in default_rules:
+            rule = ValidationRule(**rule_data)
+            db.session.add(rule)
+        
+        db.session.commit()
+        rules = ValidationRule.query.all()
+    
+    return render_template('validation_rules.html', rules=rules)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    """Handle 404 errors"""
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    """Handle 500 errors"""
+    return render_template('500.html'), 500
+
+# Create database tables within app context
+with app.app_context():
+    db.create_all()

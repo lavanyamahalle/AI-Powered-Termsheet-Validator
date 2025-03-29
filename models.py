@@ -9,7 +9,7 @@ class Document(db.Model):
     upload_date = db.Column(db.DateTime, default=datetime.utcnow)
     file_path = db.Column(db.String(255), nullable=True)
     validation_results = db.relationship('ValidationResult', backref='document', lazy=True)
-    
+
     def __repr__(self):
         return f'<Document {self.name}>'
 
@@ -19,7 +19,7 @@ class ValidationRule(db.Model):
     field_name = db.Column(db.String(100), nullable=False)
     rule_type = db.Column(db.String(50), nullable=False)  # e.g., 'required', 'date_format', 'range', 'regex'
     rule_value = db.Column(db.String(255), nullable=True)  # Rule parameters, e.g., regex pattern, min/max values
-    
+
     def __repr__(self):
         return f'<ValidationRule {self.field_name}: {self.rule_type}>'
 
@@ -30,7 +30,7 @@ class ValidationResult(db.Model):
     field_name = db.Column(db.String(100), nullable=False)
     is_valid = db.Column(db.Boolean, default=False)
     message = db.Column(db.String(255), nullable=True)  # Validation message or error
-    
+
     def __repr__(self):
         return f'<ValidationResult {self.field_name}: {"valid" if self.is_valid else "invalid"}>'
 
@@ -41,6 +41,6 @@ class ExtractedTerm(db.Model):
     term_name = db.Column(db.String(100), nullable=False)  # e.g., 'party_name', 'effective_date', 'amount'
     term_value = db.Column(db.Text, nullable=True)
     confidence_score = db.Column(db.Float, nullable=True)  # Confidence level of the extraction
-    
+
     def __repr__(self):
         return f'<ExtractedTerm {self.term_name}: {self.term_value}>'

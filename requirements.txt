@@ -1,4 +1,4 @@
 flask
-psycopg2-binaryvenv\Scripts\activate
+psycopg2-binary
 numpy
 pandas

@@ -1,6 +1,5 @@
 import os
 import logging
-
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
@@ -18,10 +17,8 @@ class Base(DeclarativeBase):
     pass
 load_dotenv()
 # Initialize Flask app and database
-
+db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
-
-
 app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key")
 
 # Configure database
@@ -33,7 +30,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
 }
-db = SQLAlchemy(model_class=Base)
+
 app.config["UPLOAD_FOLDER"] = tempfile.gettempdir()
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB limit
 app.config["ALLOWED_EXTENSIONS"] = {"pdf", "docx", "doc", "xlsx", "xls", "png", "jpg", "jpeg"}
@@ -51,6 +48,7 @@ def get_models():
 from utils.document_processor import process_document
 from utils.validation_engine import validate_extracted_data
 Document, ValidationRule, ValidationResult, ExtractedTerm = get_models()
+
 # Add context processor to provide datetime in all templates
 @app.context_processor
 def inject_now():
@@ -69,8 +67,7 @@ def index():
 def upload():
 
     # ✅ Retrieve models to avoid circular import issues
-    Document, ValidationRule, ValidationResult, ExtractedTerm = get_models()
-    """Handle document uploads and processing"""
+
     if request.method == 'POST':
         # Check if a file was uploaded
         if 'document' not in request.files:
@@ -117,11 +114,11 @@ def upload():
                 session['extracted_data'] = extracted_data
                 
                 # Store extracted terms in database
-                for term_name, term_value in list(extracted_data.items()):
+                for term_name, term_value in extracted_data.items():
                     # Convert lists to strings for storage
                     if isinstance(term_value, list):
                         term_value = ', '.join(term_value)
-                    
+
                     extracted_term = ExtractedTerm(
                         document_id=new_document.id,
                         term_name=term_name,
@@ -129,12 +126,12 @@ def upload():
                         confidence_score=0.9  # Default confidence score
                     )
                     db.session.add(extracted_term)
-                
+
                 # Validate the extracted data
                 validation_results = validate_extracted_data(extracted_data)
-                
+
                 # Save validation results
-                for field, result in list(validation_results.items()):
+                for field, result in validation_results.items():
                     validation_record = ValidationResult(
                         document_id=new_document.id,
                         field_name=field,
@@ -143,12 +140,12 @@ def upload():
                     )
                     db.session.add(validation_record)
                 db.session.commit()
-                
+
                 # Store validation results in session
                 session['validation_results'] = validation_results
-                
+
                 return redirect(url_for('results'))
-            
+
             except Exception as e:
                 logger.error(f"Error processing document: {str(e)}")
                 flash(f'Error processing document: {str(e)}', 'danger')
@@ -156,7 +153,7 @@ def upload():
         else:
             flash('File type not allowed', 'danger')
             return redirect(request.url)
-    
+
     return render_template('upload.html')
 
 @app.route('/results')
@@ -165,13 +162,13 @@ def results():
     if 'extracted_data' not in session or 'validation_results' not in session:
         flash('No document has been processed yet', 'warning')
         return redirect(url_for('upload'))
-    
+
     extracted_data = session.get('extracted_data', {})
     validation_results = session.get('validation_results', {})
-    
+
     # Calculate validation summary
     total_fields = len(validation_results)
-    valid_fields = sum(1 for result in list(validation_results.values()) if result['is_valid'])
+    valid_fields = sum(1 for result in validation_results.values() if result['is_valid'])
     validation_percentage = (valid_fields / total_fields * 100) if total_fields > 0 else 0
     
     return render_template(
